@@ -4,6 +4,7 @@
   "builds": [{ "src": "api/generate.js", "use": "@vercel/node" }],
   "routes": [
     { "src": "/api/generate", "dest": "api/generate.js" },
+    { "src": "/", "dest": "/index.html" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
