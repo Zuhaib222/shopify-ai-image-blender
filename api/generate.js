@@ -15,7 +15,7 @@ module.exports = async (req, res) => {
   try {
     const response = await openai.images.edit({
       prompt,
-      image: image1, // this needs to be a File or URL, depending on API used
+      image: image1,
       mask: image2,
       n: 1,
       size: "512x512"
