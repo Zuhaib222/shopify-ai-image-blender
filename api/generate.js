@@ -1,4 +1,6 @@
 const { Configuration, OpenAIApi } = require("openai");
+const formidable = require("formidable");
+const fs = require("fs");
 
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
@@ -10,20 +12,34 @@ module.exports = async (req, res) => {
     return res.status(405).json({ error: "Only POST requests allowed" });
   }
 
-  const { prompt, image1, image2 } = req.body;
+  const form = new formidable.IncomingForm({ keepExtensions: true });
 
-  try {
-    const response = await openai.images.edit({
-      prompt,
-      image: image1,
-      mask: image2,
-      n: 1,
-      size: "512x512"
-    });
+  form.parse(req, async (err, fields, files) => {
+    if (err) return res.status(500).json({ error: err.message });
 
-    const imageUrl = response.data.data[0].url;
-    res.status(200).json({ result: imageUrl });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+    try {
+      const prompt = fields.prompt;
+      const image = fs.createReadStream(files.image.filepath);
+      const mask = fs.createReadStream(files.mask.filepath);
+
+      const response = await openai.createImageEdit(
+        image,
+        mask,
+        prompt,
+        1,
+        "512x512"
+      );
+
+      const imageUrl = response.data.data[0].url;
+      res.status(200).json({ result: imageUrl });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+};
+
+export const config = {
+  api: {
+    bodyParser: false, // Important: disables default body parsing so `formidable` works
+  },
 };

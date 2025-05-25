@@ -1,31 +1,26 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>AI Image Blender</title>
-</head>
-<body>
-  <h1>Blend Two Images</h1>
-  <input type="text" id="prompt" placeholder="Enter your prompt" />
-  <input type="url" id="image1" placeholder="Image 1 URL" />
-  <input type="url" id="image2" placeholder="Image 2 URL" />
-  <button onclick="generateImage()">Generate</button>
-  <div id="result"></div>
+<input type="text" id="prompt" placeholder="Enter your prompt" />
+<input type="file" id="image1" />
+<input type="file" id="image2" />
+<button onclick="generateImage()">Generate</button>
+<div id="result"></div>
 
-  <script>
-    async function generateImage() {
-      const prompt = document.getElementById("prompt").value;
-      const image1 = document.getElementById("image1").value;
-      const image2 = document.getElementById("image2").value;
+<script>
+  async function generateImage() {
+    const prompt = document.getElementById("prompt").value;
+    const image1 = document.getElementById("image1").files[0];
+    const image2 = document.getElementById("image2").files[0];
 
-      const res = await fetch("/api/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt, image1, image2 })
-      });
+    const formData = new FormData();
+    formData.append("prompt", prompt);
+    formData.append("image", image1);
+    formData.append("mask", image2);
 
-      const data = await res.json();
-      document.getElementById("result").innerHTML = `<img src="${data.result}" />`;
-    }
-  </script>
-</body>
-</html>
+    const res = await fetch("/api/generate", {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await res.json();
+    document.getElementById("result").innerHTML = `<img src="${data.result}" />`;
+  }
+</script>
