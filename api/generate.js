@@ -38,8 +38,9 @@ module.exports = async (req, res) => {
   });
 };
 
-export const config = {
+// ✅ Use CommonJS syntax here:
+module.exports.config = {
   api: {
-    bodyParser: false, // Important: disables default body parsing so `formidable` works
+    bodyParser: false, // Required for formidable
   },
 };
