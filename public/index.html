@@ -7,10 +7,10 @@
 <body>
   <h1>AI Image Blender</h1>
 
-  <form id="imageForm" method="POST" action="/api/generate" enctype="multipart/form-data">
+  <form id="imageForm" enctype="multipart/form-data">
     <input type="text" name="prompt" placeholder="Enter prompt" required />
-    <input type="file" name="image" accept="image/png" required />
-    <input type="file" name="mask" accept="image/png" required />
+    <input type="file" name="image" id="imageInput" accept="image/png" required />
+    <input type="file" name="mask" id="maskInput" accept="image/png" required />
     <button type="submit">Generate Image</button>
   </form>
 
@@ -20,40 +20,33 @@
     document.getElementById('imageForm').addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      const form = e.target;
-      const imageFile = form.image.files[0];
-      const maskFile = form.mask.files[0];
+      const imageFile = document.getElementById('imageInput').files[0];
+      const maskFile = document.getElementById('maskInput').files[0];
 
-      if (!imageFile || !maskFile) {
-        alert("Please upload both image and mask files.");
-        return;
-      }
-
-      // Ensure both files are PNG
       if (imageFile.type !== "image/png" || maskFile.type !== "image/png") {
-        alert("Only PNG images are supported.");
+        alert("Please upload PNG files only.");
         return;
       }
 
-      const formData = new FormData(form);
+      const formData = new FormData();
+      formData.append("prompt", document.querySelector('input[name="prompt"]').value);
+      formData.append("image", imageFile);
+      formData.append("mask", maskFile);
 
-      try {
-        const res = await fetch('/api/generate', {
-          method: 'POST',
-          body: formData,
-        });
+      const res = await fetch("/api/generate", {
+        method: "POST",
+        body: formData,
+      });
 
-        const data = await res.json();
-        const resultDiv = document.getElementById('result');
+      const data = await res.json();
 
-        if (data.result) {
-          resultDiv.innerHTML = `<h3>Generated Image:</h3><img src="${data.result}" width="512" height="512" />`;
-        } else {
-          resultDiv.innerHTML = `<p>Error: ${data.error}</p>`;
-        }
-      } catch (error) {
-        console.error("Fetch error:", error);
-        document.getElementById('result').innerHTML = `<p>Error: ${error.message}</p>`;
+      if (data.result) {
+        document.getElementById("result").innerHTML = `
+          <h3>Generated Image:</h3>
+          <img src="${data.result}" width="512" height="512">
+        `;
+      } else {
+        document.getElementById("result").innerHTML = `<p>Error: ${data.error}</p>`;
       }
     });
   </script>
