@@ -1,70 +1,46 @@
+<!-- public/index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI Image Blender</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      padding: 20px;
-      max-width: 600px;
-      margin: auto;
-    }
-    input, button {
-      margin-top: 10px;
-      display: block;
-      width: 100%;
-    }
-    img {
-      margin-top: 20px;
-      max-width: 100%;
-      border: 1px solid #ccc;
-    }
-  </style>
+  <title>Image Blender</title>
 </head>
 <body>
   <h1>AI Image Blender</h1>
-  <form id="image-form" method="POST" enctype="multipart/form-data">
-  <label>Select main image:</label>
-    <input type="file" name="image" accept="image/*" required />
+  <form id="blendForm" method="POST" enctype="multipart/form-data">
+    <label>Prompt:</label>
+    <input type="text" name="prompt" required><br><br>
 
-    <label>Select mask image:</label>
-    <input type="file" name="mask" accept="image/*" required />
+    <label>Original Image:</label>
+    <input type="file" name="image" accept="image/*" required><br><br>
 
-    <label>Enter prompt:</label>
-    <input type="text" name="prompt" placeholder="e.g. add a sunset" required />
+    <label>Mask Image:</label>
+    <input type="file" name="mask" accept="image/*" required><br><br>
 
-    <button type="submit">Generate</button>
+    <button type="submit">Generate Image</button>
   </form>
 
   <div id="result"></div>
 
   <script>
-    const form = document.getElementById('image-form');
-    const resultDiv = document.getElementById('result');
-
-    form.addEventListener('submit', async (e) => {
+    document.getElementById('blendForm').addEventListener('submit', async (e) => {
       e.preventDefault();
 
+      const form = e.target;
       const formData = new FormData(form);
-      resultDiv.innerHTML = 'Generating...';
 
-      try {
-        const response = await fetch('/api/generate', {
-          method: 'POST',
-          body: formData,
-        });
+      const res = await fetch('/api/generate', {
+        method: 'POST',
+        body: formData,
+      });
 
-        const data = await response.json();
-
-        if (response.ok) {
-          resultDiv.innerHTML = `<h2>Generated Image:</h2><img src="${data.result}" alt="Generated Image" />`;
-        } else {
-          resultDiv.innerHTML = `<p style="color:red;">Error: ${data.error}</p>`;
-        }
-      } catch (err) {
-        resultDiv.innerHTML = `<p style="color:red;">Error: ${err.message}</p>`;
+      const data = await res.json();
+      if (data.result) {
+        document.getElementById('result').innerHTML =
+          `<h3>Generated Image:</h3><img src="${data.result}" width="512" height="512">`;
+      } else {
+        document.getElementById('result').innerHTML =
+          `<p>Error: ${data.error}</p>`;
       }
     });
   </script>
