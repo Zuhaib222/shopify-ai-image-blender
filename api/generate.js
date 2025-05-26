@@ -1,6 +1,6 @@
-const OpenAI = require("openai");
-const formidable = require("formidable");
+const { IncomingForm } = require("formidable");
 const fs = require("fs");
+const OpenAI = require("openai");
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -11,22 +11,15 @@ module.exports = async (req, res) => {
     return res.status(405).json({ error: "Only POST requests allowed" });
   }
 
-  const form = formidable({ multiples: true, keepExtensions: true });
+  const form = new IncomingForm({ keepExtensions: true });
 
   form.parse(req, async (err, fields, files) => {
     if (err) return res.status(500).json({ error: err.message });
 
     try {
       const prompt = fields.prompt;
-      const imageFile = files.image;
-      const maskFile = files.mask;
-
-      if (!imageFile || !maskFile) {
-        return res.status(400).json({ error: "Image and mask files are required" });
-      }
-
-      const image = fs.createReadStream(imageFile[0]?.filepath || imageFile.filepath);
-      const mask = fs.createReadStream(maskFile[0]?.filepath || maskFile.filepath);
+      const image = fs.createReadStream(files.image[0].filepath);
+      const mask = fs.createReadStream(files.mask[0].filepath);
 
       const response = await openai.images.edit({
         image,
