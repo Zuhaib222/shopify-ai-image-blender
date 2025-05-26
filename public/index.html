@@ -18,12 +18,13 @@
   <script>
     document.getElementById('blendForm').addEventListener('submit', async (e) => {
       e.preventDefault();
+
       const form = e.target;
       const formData = new FormData(form);
 
       const res = await fetch('/api/generate', {
         method: 'POST',
-        body: formData
+        body: formData,
       });
 
       const data = await res.json();
@@ -32,7 +33,7 @@
           `<h3>Generated Image:</h3><img src="${data.result}" width="512" height="512">`;
       } else {
         document.getElementById('result').innerHTML =
-          `<p style="color:red;">Error: ${data.error}</p>`;
+          `<p style="color: red;">Error: ${data.error}</p>`;
       }
     });
   </script>
