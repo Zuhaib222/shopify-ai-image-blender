@@ -1,4 +1,4 @@
-const { IncomingForm } = require("formidable");
+const formidable = require("formidable");
 const fs = require("fs");
 const OpenAI = require("openai");
 
@@ -11,15 +11,23 @@ module.exports = async (req, res) => {
     return res.status(405).json({ error: "Only POST requests allowed" });
   }
 
-  const form = new IncomingForm({ keepExtensions: true });
+  const form = formidable({ keepExtensions: true });
 
   form.parse(req, async (err, fields, files) => {
     if (err) return res.status(500).json({ error: err.message });
 
     try {
       const prompt = fields.prompt;
-      const image = fs.createReadStream(files.image[0].filepath);
-      const mask = fs.createReadStream(files.mask[0].filepath);
+      const imageFile = files.image;
+      const maskFile = files.mask;
+
+      // Check mimetype
+      if (imageFile.mimetype !== 'image/png' || maskFile.mimetype !== 'image/png') {
+        return res.status(400).json({ error: "Only PNG images are supported." });
+      }
+
+      const image = fs.createReadStream(imageFile.filepath);
+      const mask = fs.createReadStream(maskFile.filepath);
 
       const response = await openai.images.edit({
         image,
