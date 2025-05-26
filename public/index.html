@@ -1,46 +1,43 @@
- <h1>heloooooo</h1>
- <form id="imageForm" method="POST" action="/api/generate" enctype="multipart/form-data">
+<form id="imageForm" method="POST" action="/api/generate" enctype="multipart/form-data">
   <input type="text" name="prompt" placeholder="Enter prompt" required />
+
+  <!-- Strictly accept PNG -->
   <input type="file" name="image" accept="image/png" required />
   <input type="file" name="mask" accept="image/png" required />
+
   <button type="submit">Generate Image</button>
 </form>
 
 <script>
   document.getElementById('imageForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-
     const form = e.target;
-    const imageFile = form.image.files[0];
-    const maskFile = form.mask.files[0];
+    const formData = new FormData(form);
 
+    const image = form.image.files[0];
+    const mask = form.mask.files[0];
+
+    // Check for PNG MIME type
     if (
-      imageFile.type !== 'image/png' ||
-      maskFile.type !== 'image/png'
+      image.type !== 'image/png' ||
+      mask.type !== 'image/png'
     ) {
-      alert("Only PNG files are allowed.");
+      alert('Only PNG files are supported.');
       return;
     }
 
-    const formData = new FormData(form);
+    const res = await fetch('/api/generate', {
+      method: 'POST',
+      body: formData,
+    });
 
-    try {
-      const res = await fetch('/api/generate', {
-        method: 'POST',
-        body: formData,
-      });
-
-      const data = await res.json();
-      if (data.result) {
-        document.getElementById('result').innerHTML =
-          `<h3>Generated Image:</h3><img src="${data.result}" width="512" height="512">`;
-      } else {
-        document.getElementById('result').innerHTML =
-          `<p>Error: ${data.error}</p>`;
-      }
-    } catch (error) {
+    const data = await res.json();
+    if (data.result) {
       document.getElementById('result').innerHTML =
-        `<p>Fetch Error: ${error.message}</p>`;
+        `<h3>Generated Image:</h3><img src="${data.result}" width="512" height="512">`;
+    } else {
+      document.getElementById('result').innerHTML =
+        `<p>Error: ${data.error}</p>`;
     }
   });
 </script>
