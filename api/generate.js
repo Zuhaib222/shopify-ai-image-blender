@@ -1,5 +1,6 @@
 const { IncomingForm } = require('formidable');
 const fs = require('fs');
+const path = require('path');
 const OpenAI = require("openai");
 
 const openai = new OpenAI({
@@ -25,10 +26,14 @@ module.exports = async (req, res) => {
       const maskFile = files.mask;
 
       if (!imageFile || !maskFile) {
-        return res.status(400).json({ error: "Both image and mask are required." });
+        return res.status(400).json({ error: "Both image and mask files are required." });
       }
 
-      if (imageFile.mimetype !== 'image/png' || maskFile.mimetype !== 'image/png') {
+      // Validate file extension instead of MIME type
+      const imageExt = path.extname(imageFile.originalFilename).toLowerCase();
+      const maskExt = path.extname(maskFile.originalFilename).toLowerCase();
+
+      if (imageExt !== '.png' || maskExt !== '.png') {
         return res.status(400).json({ error: "Only PNG images are supported." });
       }
 
