@@ -15,40 +15,35 @@
   </form>
 
   <div id="result"></div>
+<script>
+  document.getElementById('imageForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
 
-  <script>
-    document.getElementById('imageForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+    const imageFile = form.image.files[0];
+    const maskFile = form.mask.files[0];
 
-      const imageFile = document.getElementById('imageInput').files[0];
-      const maskFile = document.getElementById('maskInput').files[0];
+    if (imageFile.type !== "image/png" || maskFile.type !== "image/png") {
+      alert("Only PNG images are supported.");
+      return;
+    }
 
-      if (imageFile.type !== "image/png" || maskFile.type !== "image/png") {
-        alert("Please upload PNG files only.");
-        return;
-      }
-
-      const formData = new FormData();
-      formData.append("prompt", document.querySelector('input[name="prompt"]').value);
-      formData.append("image", imageFile);
-      formData.append("mask", maskFile);
-
-      const res = await fetch("/api/generate", {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await res.json();
-
-      if (data.result) {
-        document.getElementById("result").innerHTML = `
-          <h3>Generated Image:</h3>
-          <img src="${data.result}" width="512" height="512">
-        `;
-      } else {
-        document.getElementById("result").innerHTML = `<p>Error: ${data.error}</p>`;
-      }
+    const res = await fetch('/api/generate', {
+      method: 'POST',
+      body: formData,
     });
-  </script>
+
+    const data = await res.json();
+    const resultDiv = document.getElementById('result');
+    if (data.result) {
+      resultDiv.innerHTML = `<h3>Generated Image:</h3><img src="${data.result}" width="512" height="512">`;
+    } else {
+      resultDiv.innerHTML = `<p>Error: ${data.error}</p>`;
+    }
+  });
+</script>
+
+  
 </body>
 </html>
