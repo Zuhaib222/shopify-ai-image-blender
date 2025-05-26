@@ -6,19 +6,18 @@
 </head>
 <body>
   <h1>AI Image Blender</h1>
-<form id="imageForm" method="POST" action="/api/generate" enctype="multipart/form-data">
-  <input type="text" name="prompt" placeholder="Enter prompt" required />
-  <input type="file" name="image" accept="image/*" required />
-  <input type="file" name="mask" accept="image/*" required />
-  <button type="submit">Generate Image</button>
-</form>
 
-  
+  <form id="imageForm" method="POST" action="/api/generate" enctype="multipart/form-data">
+    <input type="text" name="prompt" placeholder="Enter prompt" required />
+    <input type="file" name="image" accept="image/*" required />
+    <input type="file" name="mask" accept="image/*" required />
+    <button type="submit">Generate Image</button>
+  </form>
 
   <div id="result"></div>
 
   <script>
-    document.getElementById('blendForm').addEventListener('submit', async (e) => {
+    document.getElementById('imageForm').addEventListener('submit', async (e) => {
       e.preventDefault();
 
       const form = e.target;
