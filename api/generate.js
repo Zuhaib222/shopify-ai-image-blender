@@ -11,7 +11,7 @@ module.exports = async (req, res) => {
     return res.status(405).json({ error: "Only POST requests allowed" });
   }
 
-  const form = formidable({ keepExtensions: true });
+  const form = new formidable.IncomingForm({ keepExtensions: true });
 
   form.parse(req, async (err, fields, files) => {
     if (err) return res.status(500).json({ error: err.message });
