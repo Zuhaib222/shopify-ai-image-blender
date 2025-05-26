@@ -1,11 +1,10 @@
-const { Configuration, OpenAIApi } = require("openai");
+const OpenAI = require("openai");
 const formidable = require("formidable");
 const fs = require("fs");
 
-const configuration = new Configuration({
+const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
-const openai = new OpenAIApi(configuration);
 
 module.exports = async (req, res) => {
   if (req.method !== "POST") {
@@ -22,25 +21,25 @@ module.exports = async (req, res) => {
       const image = fs.createReadStream(files.image.filepath);
       const mask = fs.createReadStream(files.mask.filepath);
 
-      const response = await openai.createImageEdit(
+      const response = await openai.images.edit({
         image,
         mask,
         prompt,
-        1,
-        "512x512"
-      );
+        n: 1,
+        size: "512x512",
+      });
 
-      const imageUrl = response.data.data[0].url;
+      const imageUrl = response.data[0].url;
       res.status(200).json({ result: imageUrl });
     } catch (error) {
+      console.error("OpenAI error:", error);
       res.status(500).json({ error: error.message });
     }
   });
 };
 
-// ✅ Use CommonJS syntax here:
-module.exports.config = {
+export const config = {
   api: {
-    bodyParser: false, // Required for formidable
+    bodyParser: false,
   },
 };
