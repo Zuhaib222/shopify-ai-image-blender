@@ -11,7 +11,13 @@ module.exports = async (req, res) => {
     return res.status(405).json({ error: "Only POST requests allowed" });
   }
 
-  const form = formidable({ multiples: false, keepExtensions: true });
+  const form = formidable({
+    multiples: false,
+    keepExtensions: true,
+    filter: ({ mimetype }) => {
+      return mimetype && mimetype.includes("image/png");
+    },
+  });
 
   form.parse(req, async (err, fields, files) => {
     if (err) return res.status(500).json({ error: err.message });
@@ -21,12 +27,8 @@ module.exports = async (req, res) => {
       const imageFile = files.image;
       const maskFile = files.mask;
 
-      // Check mime types
-      if (
-        imageFile.mimetype !== "image/png" ||
-        maskFile.mimetype !== "image/png"
-      ) {
-        return res.status(400).json({ error: "Only PNG images are supported." });
+      if (!imageFile || !maskFile) {
+        return res.status(400).json({ error: "Both image and mask are required." });
       }
 
       const image = fs.createReadStream(imageFile.filepath);
